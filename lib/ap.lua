@@ -7,9 +7,20 @@
 
 local ap = {}
 
+local function hasType(side, name)
+    -- peripheral.hasType() exists in CC:T 1.99+; fall back to checking all returned types
+    if peripheral.hasType then
+        return peripheral.hasType(side, name)
+    end
+    for _, t in ipairs({ peripheral.getType(side) }) do
+        if t == name then return true end
+    end
+    return false
+end
+
 local function findUpgrade(name)
     for _, side in ipairs({ "left", "right" }) do
-        if peripheral.isPresent(side) and peripheral.getType(side) == name then
+        if peripheral.isPresent(side) and hasType(side, name) then
             return peripheral.wrap(side)
         end
     end
@@ -54,6 +65,15 @@ function ap.waitCooldown(automata, opType)
         local ms = getter()
         if ms and ms > 0 then
             os.sleep(ms / 1000)
+        end
+    end
+end
+
+-- Print all detected peripherals and their types (debug)
+function ap.listAll()
+    for _, side in ipairs({ "left", "right", "top", "bottom", "front", "back" }) do
+        if peripheral.isPresent(side) then
+            print(side .. ": " .. table.concat({ peripheral.getType(side) }, ", "))
         end
     end
 end
