@@ -27,29 +27,24 @@ local function findUpgrade(name)
     return nil
 end
 
--- Returns Weak Automata peripheral or nil
 function ap.weakAutomata()
-    return findUpgrade("weakAutomata")
+    return findUpgrade("weak_automata")
 end
 
--- Returns Husbandry Automata peripheral or nil
 function ap.husbandryAutomata()
-    return findUpgrade("husbandryAutomata")
+    return findUpgrade("husbandry_automata")
 end
 
--- Returns End Automata peripheral or nil
 function ap.endAutomata()
-    return findUpgrade("endAutomata")
+    return findUpgrade("end_automata")
 end
 
--- Returns Geo Scanner peripheral or nil (turtle upgrade version)
 function ap.geoScanner()
-    return findUpgrade("geoScanner")
+    return findUpgrade("geo_scanner")
 end
 
--- Returns Player Detector peripheral or nil (turtle upgrade version)
 function ap.playerDetector()
-    return findUpgrade("playerDetector")
+    return findUpgrade("player_detector")
 end
 
 -- Sleep for the cooldown period reported by an automata before next op.
