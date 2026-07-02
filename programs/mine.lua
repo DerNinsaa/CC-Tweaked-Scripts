@@ -8,10 +8,12 @@
 --   spacing - blocks between tunnel centers (default 3)
 --
 -- Setup:
---   1. Chest directly behind turtle at origin.
---   2. Fuel in any slot (coal, lava bucket, etc.).
---   3. Optional: torches in any slot for lighting.
---   4. Optional: Weak Automata upgrade equipped on left or right.
+--   1. Chest directly IN FRONT of turtle (turtle faces chest at start).
+--   2. Turtle steps back 1 block before running so chest is at z=-1.
+--      OR: place turtle 1 block in front of chest, facing it, then run.
+--   3. Fuel in any slot (coal, lava bucket, etc.).
+--   4. Optional: torches in any slot for lighting.
+--   5. Optional: Weak Automata upgrade equipped on left or right.
 
 package.path = "/?.lua;/?/init.lua;" .. package.path
 
@@ -41,11 +43,6 @@ local function digFwd()
     return turtle.dig()
 end
 
--- Dig up: vanilla only (digBlock only faces forward)
-local function digUp()
-    return turtle.digUp()
-end
-
 -- Collect nearby dropped items (AP only, no-op otherwise)
 local function collectDrops()
     if weak then
@@ -54,13 +51,20 @@ local function collectDrops()
     end
 end
 
+-- Deposit into chest in front at origin, then face away (south) so
+-- the next run won't dig into the chest.
+local function deposit()
+    nav.face(0)  -- face north = face chest
+    inv.dropAll({ "minecraft:coal", "minecraft:charcoal", "minecraft:torch" })
+    nav.face(2)  -- face south = away from chest, ready to mine
+end
+
 local function dumpInventory()
     local savedPos  = nav.getPos()
     local savedHead = nav.getHeading()
 
     nav.goto(0, 0, 0)
-    nav.face(2)  -- south: chest is placed behind turtle when facing north at origin
-    inv.dropAll({ "minecraft:coal", "minecraft:charcoal", "minecraft:torch" })
+    deposit()
 
     nav.goto(savedPos.x, savedPos.y, savedPos.z)
     nav.face(savedHead)
@@ -68,7 +72,11 @@ end
 
 local function mineTunnel(length)
     for i = 1, length do
+        -- Check fuel and inventory BEFORE moving
         inv.ensureFuel(length * 3)
+        if inv.isFull() then
+            dumpInventory()
+        end
 
         -- 2-tall shaft: dig forward + above
         while turtle.detect() do
@@ -79,7 +87,6 @@ local function mineTunnel(length)
 
         local ok = nav.forward()
         if not ok then
-            -- Mob or gravity block fell; retry
             digFwd()
             nav.forward()
         end
@@ -92,10 +99,6 @@ local function mineTunnel(length)
                 turtle.placeDown()
                 turtle.select(1)
             end
-        end
-
-        if inv.isFull() then
-            dumpInventory()
         end
     end
 end
@@ -120,8 +123,7 @@ local function run()
 
     print("Returning to origin...")
     nav.goto(0, 0, 0)
-    nav.face(2)
-    inv.dropAll({ "minecraft:coal", "minecraft:charcoal", "minecraft:torch" })
+    deposit()
     print("Done.")
 end
 
