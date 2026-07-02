@@ -13,6 +13,7 @@ local FILES = {
     "programs/mine.lua",
     "programs/farm.lua",
     "programs/fell.lua",
+    "programs/stairdive.lua",
     "startup.lua",
 }
 
