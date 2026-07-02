@@ -26,27 +26,36 @@ local SPACING = tonumber(args[3]) or 3
 
 local weak = ap.weakAutomata()
 if weak then
-    print("Weak Automata detected.")
+    print("Weak Automata detected. FE: " .. tostring(weak.getFuelLevel()) .. "/" .. tostring(weak.getFuelMaxLevel()))
 else
     print("No Weak Automata - using vanilla dig.")
 end
 
--- Dig forward with AP if available, else vanilla
+-- Try to charge automata from energy cell in inventory
+local function chargeAutomata()
+    if not weak then return end
+    local level = weak.getFuelLevel()
+    local max   = weak.getFuelMaxLevel()
+    if level < max * 0.2 then
+        print("Low FE (" .. level .. "), charging...")
+        weak.chargeTurtle()
+    end
+end
+
+-- Dig forward: AP first, fall back to vanilla if AP fails or uncharged
 local function digFwd()
     if weak then
+        chargeAutomata()
         local ok, err = weak.digBlock()
         ap.waitCooldown(weak, "dig")
-        return ok, err
+        if ok then return true end
+        -- AP failed (out of FE or no tool) - fall back
     end
     return turtle.dig()
 end
 
--- Dig up with AP if available, else vanilla
+-- Dig up: vanilla only (digBlock only faces forward)
 local function digUp()
-    if weak then
-        -- Weak Automata digBlock() only digs in front; use vanilla for up/down
-        return turtle.digUp()
-    end
     return turtle.digUp()
 end
 
