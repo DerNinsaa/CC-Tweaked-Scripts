@@ -31,20 +31,12 @@ else
     print("No Weak Automata - using vanilla dig.")
 end
 
--- Attempt charge from energy cell in inventory; ignore errors
-local function chargeAutomata()
-    if not weak then return end
-    pcall(function() weak.chargeTurtle() end)
-end
-
--- Dig forward: AP first, fall back to vanilla if AP fails or uncharged
+-- Dig forward: AP first, fall back to vanilla if AP fails
 local function digFwd()
     if weak then
-        chargeAutomata()
-        local ok, err = weak.digBlock()
+        local ok = weak.digBlock()
         ap.waitCooldown(weak, "dig")
         if ok then return true end
-        -- AP failed (out of FE or no tool) - fall back
     end
     return turtle.dig()
 end
