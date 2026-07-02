@@ -48,7 +48,8 @@ function ap.playerDetector()
 end
 
 -- Sleep for the cooldown period reported by an automata before next op.
--- pass the method name: "dig", "suck", "useOnBlock"
+-- AP docs don't specify units; values <= 20 are treated as seconds,
+-- values > 20 as milliseconds (ticks would be ~5-20, ms would be 100-2000).
 function ap.waitCooldown(automata, opType)
     local fn = {
         dig        = automata.getDigCooldown,
@@ -57,9 +58,10 @@ function ap.waitCooldown(automata, opType)
     }
     local getter = fn[opType]
     if getter then
-        local ms = getter()
-        if ms and ms > 0 then
-            os.sleep(ms / 1000)
+        local val = getter()
+        if val and val > 0 then
+            local secs = val > 20 and (val / 1000) or val
+            os.sleep(secs)
         end
     end
 end
