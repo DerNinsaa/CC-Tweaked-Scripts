@@ -26,17 +26,27 @@ local SPACING = tonumber(args[3]) or 3
 
 local weak = ap.weakAutomata()
 if weak then
-    print("Weak Automata detected. FE: " .. tostring(weak.getFuelLevel()) .. "/" .. tostring(weak.getFuelMaxLevel()))
+    local feLevel = weak.getFuelLevel and weak.getFuelLevel() or "?"
+    local feMax   = (weak.getFuelMaxLevel and weak.getFuelMaxLevel())
+                 or (weak.getMaxFuelLevel and weak.getMaxFuelLevel())
+                 or "?"
+    print("Weak Automata detected. FE: " .. tostring(feLevel) .. "/" .. tostring(feMax))
 else
     print("No Weak Automata - using vanilla dig.")
+end
+
+local function getWeakFuelMax()
+    if weak.getFuelMaxLevel then return weak.getFuelMaxLevel() end
+    if weak.getMaxFuelLevel then return weak.getMaxFuelLevel() end
+    return nil
 end
 
 -- Try to charge automata from energy cell in inventory
 local function chargeAutomata()
     if not weak then return end
-    local level = weak.getFuelLevel()
-    local max   = weak.getFuelMaxLevel()
-    if level < max * 0.2 then
+    local level = weak.getFuelLevel and weak.getFuelLevel()
+    local max   = getWeakFuelMax()
+    if level and max and level < max * 0.2 then
         print("Low FE (" .. level .. "), charging...")
         weak.chargeTurtle()
     end
