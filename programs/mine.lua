@@ -13,6 +13,8 @@
 --   3. Optional: torches in any slot for lighting.
 --   4. Optional: Weak Automata upgrade equipped on left or right.
 
+package.path = "/?.lua;/?/init.lua;" .. package.path
+
 local nav = require("lib.nav")
 local inv = require("lib.inv")
 local ap  = require("lib.ap")

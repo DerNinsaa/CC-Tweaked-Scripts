@@ -4,6 +4,8 @@
 --
 -- Turtle must be facing the tree. Sapling in slot 2, fuel in slot 16.
 
+package.path = "/?.lua;/?/init.lua;" .. package.path
+
 local nav = require("lib.nav")
 local inv = require("lib.inv")
 

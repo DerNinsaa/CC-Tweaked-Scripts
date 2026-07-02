@@ -12,6 +12,8 @@
 --
 -- Turtle serpentines: row 1 forward, turn, row 2 back, turn, ...
 
+package.path = "/?.lua;/?/init.lua;" .. package.path
+
 local nav = require("lib.nav")
 local inv = require("lib.inv")
 
