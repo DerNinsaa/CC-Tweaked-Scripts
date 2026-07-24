@@ -20,7 +20,9 @@ local FILES = {
 }
 
 local function download(path)
-    local url = BASE_URL .. path
+    -- Cache-bust: raw.githubusercontent.com can serve a stale CDN copy for a
+    -- few minutes after a push. Unique query string forces a fresh fetch.
+    local url = BASE_URL .. path .. "?cb=" .. os.epoch("utc")
     local dir = fs.getDir(path)
     if dir ~= "" and not fs.isDir(dir) then
         fs.makeDir(dir)
