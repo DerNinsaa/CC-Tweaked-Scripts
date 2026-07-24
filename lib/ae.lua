@@ -21,9 +21,19 @@ local function safeCall(bridge, method, ...)
     return result
 end
 
+-- AE2 reports this sentinel (int32 max) for craftable-only/pattern entries
+-- with no real stored stack. Filter out so it doesn't dominate top-N.
+local COUNT_SENTINEL = 2147483647
+
 -- Top N items by quantity, descending.
 function ae.topItems(bridge, n)
-    local items = safeCall(bridge, "getItems") or {}
+    local raw = safeCall(bridge, "getItems") or {}
+    local items = {}
+    for _, item in ipairs(raw) do
+        if (item.count or 0) < COUNT_SENTINEL then
+            items[#items + 1] = item
+        end
+    end
     table.sort(items, function(a, b) return (a.count or 0) > (b.count or 0) end)
     local top = {}
     for i = 1, math.min(n, #items) do top[i] = items[i] end
