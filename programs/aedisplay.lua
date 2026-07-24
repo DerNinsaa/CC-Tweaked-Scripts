@@ -67,7 +67,7 @@ local function drawItems(items)
         local y = listY1 + i - 1
         if item then
             local name = item.displayName or item.name or "?"
-            local count = ae.formatCount(item.amount)
+            local count = ae.formatCount(item.count)
             local avail = listX2 - 2
             local label = name
             if #label > avail - #count - 1 then
