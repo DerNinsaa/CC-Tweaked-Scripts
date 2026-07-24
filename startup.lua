@@ -11,5 +11,5 @@ package.path = package.path .. ";" .. libPath .. "/?.lua"
 
 print("CC:T Turtle Automator")
 print("Fuel: " .. tostring(turtle.getFuelLevel()))
-print("Programs: mine, farm, fell")
+print("Programs: mine, farm, fell, stairdive, aedisplay")
 print("Type: <program> --help  (coming soon)")

@@ -10,10 +10,12 @@ local FILES = {
     "lib/nav.lua",
     "lib/inv.lua",
     "lib/ap.lua",
+    "lib/ae.lua",
     "programs/mine.lua",
     "programs/farm.lua",
     "programs/fell.lua",
     "programs/stairdive.lua",
+    "programs/aedisplay.lua",
     "startup.lua",
 }
 
