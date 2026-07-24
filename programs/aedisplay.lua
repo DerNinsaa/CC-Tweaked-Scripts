@@ -6,7 +6,7 @@
 --   2. Advanced monitor(s) wired to computer, left side. Any grid size works,
 --      layout scales to whatever monitor.getSize() reports.
 --
--- Left ~65% of screen: top items by quantity, paginated (touch list to page).
+-- Left ~65% of screen: top items by quantity, paginated (< PREV / NEXT > buttons).
 -- Right column: energy storage + active AE2 crafting CPUs.
 
 package.path = "/?.lua;/?/init.lua;" .. package.path
@@ -44,7 +44,13 @@ local function clearRegion(x1, y1, x2, y2)
     end
 end
 
-local function drawHeader()
+local PREV_LABEL = "< PREV"
+local NEXT_LABEL = "NEXT >"
+local prevX1, prevX2 = 2, 2 + #PREV_LABEL - 1
+local nextX1, nextX2 = listX2 - #NEXT_LABEL + 1, listX2
+local navY = 2
+
+local function drawHeader(maxPage)
     mon.setBackgroundColor(colors.gray)
     mon.setTextColor(colors.white)
     for y = 1, headerH do
@@ -53,8 +59,15 @@ local function drawHeader()
     end
     mon.setCursorPos(2, 1)
     mon.write("AE2 STORAGE MONITOR")
-    mon.setCursorPos(2, 2)
-    mon.write(("Page %d - touch list to page"):format(page + 1))
+
+    mon.setCursorPos(prevX1, navY)
+    mon.write(PREV_LABEL)
+    mon.setCursorPos(nextX1, navY)
+    mon.write(NEXT_LABEL)
+    local pageLabel = ("Page %d/%d"):format(page + 1, maxPage + 1)
+    mon.setCursorPos(math.floor((prevX2 + nextX1 - #pageLabel) / 2), navY)
+    mon.write(pageLabel)
+
     mon.setBackgroundColor(colors.black)
 end
 
@@ -92,16 +105,16 @@ local function drawEnergy(energy)
     y = y + 1
     mon.setCursorPos(sideX1, y)
     if energy.stored and energy.max then
-        mon.write(ae.formatCount(energy.stored) .. "/" .. ae.formatCount(energy.max) .. " FE")
+        mon.write(ae.formatCount(math.floor(energy.stored)) .. "/" .. ae.formatCount(math.floor(energy.max)) .. " FE")
     elseif energy.stored then
-        mon.write(ae.formatCount(energy.stored) .. " FE")
+        mon.write(ae.formatCount(math.floor(energy.stored)) .. " FE")
     else
         mon.write("n/a")
     end
     y = y + 1
     if energy.usage then
         mon.setCursorPos(sideX1, y)
-        mon.write(ae.formatCount(energy.usage) .. " FE/t")
+        mon.write(ae.formatCount(math.floor(energy.usage)) .. " FE/t")
         y = y + 1
     end
     return y + 1
@@ -138,7 +151,11 @@ local function refresh()
     local energy = ae.energy(bridge)
     local cpus = ae.craftingCPUs(bridge)
 
-    drawHeader()
+    local rows = listY2 - listY1 + 1
+    local maxPage = math.max(0, math.ceil(#items / rows) - 1)
+    if page > maxPage then page = maxPage end
+
+    drawHeader(maxPage)
     drawItems(items)
     clearRegion(sideX1, listY1, w, listY2)
     local afterEnergy = drawEnergy(energy)
@@ -158,13 +175,20 @@ while true do
         timer = os.startTimer(REFRESH_SECS)
     elseif ev == "monitor_touch" then
         local x, y = b, c
-        if y >= listY1 and y <= listY2 and x <= listX2 then
+        if y == navY then
             local rows = listY2 - listY1 + 1
             local maxPage = math.max(0, math.ceil(#items / rows) - 1)
-            page = page + 1
-            if page > maxPage then page = 0 end
-            drawHeader()
-            drawItems(items)
+            if x >= prevX1 and x <= prevX2 then
+                page = page - 1
+                if page < 0 then page = maxPage end
+                drawHeader(maxPage)
+                drawItems(items)
+            elseif x >= nextX1 and x <= nextX2 then
+                page = page + 1
+                if page > maxPage then page = 0 end
+                drawHeader(maxPage)
+                drawItems(items)
+            end
         end
     end
 end
