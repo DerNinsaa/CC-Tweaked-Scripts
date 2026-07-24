@@ -120,6 +120,9 @@ local function drawEnergy(energy)
     return y + 1
 end
 
+-- ME Bridge's getCraftingCPUs() only exposes storage/coProcessors/isBusy -
+-- no field links a CPU to the item it's crafting, so we can only report
+-- how many CPUs are busy, not what they're making.
 local function drawCrafting(cpus, y)
     mon.setTextColor(colors.yellow)
     mon.setCursorPos(sideX1, y)
@@ -128,22 +131,10 @@ local function drawCrafting(cpus, y)
     y = y + 1
     local busy = 0
     for _, cpu in ipairs(cpus) do
-        if cpu.isBusy or cpu.busy then busy = busy + 1 end
+        if cpu.isBusy then busy = busy + 1 end
     end
     mon.setCursorPos(sideX1, y)
     mon.write(busy .. "/" .. #cpus .. " CPUs busy")
-    y = y + 1
-    for _, cpu in ipairs(cpus) do
-        if y > listY2 then break end
-        if cpu.isBusy or cpu.busy then
-            local job = cpu.craftingItem or cpu.name or "?"
-            local avail = w - sideX1
-            if #job > avail then job = job:sub(1, avail - 1) .. "." end
-            mon.setCursorPos(sideX1, y)
-            mon.write(job)
-            y = y + 1
-        end
-    end
 end
 
 local function refresh()
