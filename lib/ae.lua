@@ -23,7 +23,7 @@ end
 
 -- Top N items by quantity, descending.
 function ae.topItems(bridge, n)
-    local items = safeCall(bridge, "listItems") or {}
+    local items = safeCall(bridge, "getItems") or {}
     table.sort(items, function(a, b) return (a.amount or 0) > (b.amount or 0) end)
     local top = {}
     for i = 1, math.min(n, #items) do top[i] = items[i] end
